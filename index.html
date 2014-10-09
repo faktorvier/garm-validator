@@ -1,0 +1,153 @@
+<!doctype html>
+<html class="no-js" lang="">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<title>Garm Validator Playground</title>
+		<meta name="description" content="">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+
+		<style type="text/css">
+			label {
+				display: block;
+				margin-top: 10px;
+			}
+
+			#checkboxgroup label {
+				display: inline;
+			}
+
+			input.error,
+			textarea.error,
+			select.error,
+			fieldset.error input {
+				background-color: #FFCCCC;
+			}
+
+			input.loading,
+			textarea.loading,
+			select.loading {
+				background-color: #CCFFCC;
+			}
+
+			fieldset.error input[type=checkbox],
+			input[type=checkbox].error {
+				outline: 1px solid red;
+			}
+
+			fieldset.error label,
+			label.error {
+				color: blue;
+			}
+		</style>
+	</head>
+	<body>
+
+		<h1>Garm Validator Playground</h1>
+
+		<form action="" method="post" class="validate" novalidate>
+			<label for="required-cb">required checkbox</label>
+			<input type="checkbox" name="required-cb" id="required-cb" value="1" data-garm="required" />
+
+			<label for="required">required textfield</label>
+			<input type="text" name="required" id="required" data-garm="required" />
+
+			<label for="required-textarea">required textarea</label>
+			<textarea name="required-textarea" id="required-textarea" rows="3" cols="40" data-garm="required"></textarea>
+
+			<label for="required-select">required select</label>
+			<select name="required-select" id="required-select" data-garm="required">
+				<option value="">Please select</option>
+				<option value="1">Option 1</option>
+				<option value="2">Option 2</option>
+				<option value="3">Option 3</option>
+				<option value="4">Option 4</option>
+			</select>
+
+			<label for="required-select-multi">required multi select (2 - 3)</label>
+			<select name="required-select-multi" id="required-select-multi" size="5" multiple="multiple" data-garm="required[2,3]">
+				<option value="1">Option 1</option>
+				<option value="2">Option 2</option>
+				<option value="3">Option 3</option>
+				<option value="4">Option 4</option>
+				<option value="5">Option 5</option>
+			</select>
+
+			<label for="slowfake">slow ajax request fake</label>
+			<input type="text" name="slowfake" id="slowfake" data-garm="required slow" />
+
+			<label for="email">email</label>
+			<input type="text" name="email" id="email" data-garm="required email" />
+
+			<label for="url">url</label>
+			<input type="text" name="url" id="url" data-garm="required url" />
+
+			<label for="creditcard">creditcard</label>
+			<input type="text" name="creditcard" id="creditcard" data-garm="creditcard" />
+
+			<label for="integer">integer</label>
+			<input type="text" name="integer" id="integer" data-garm="integer" />
+
+			<label for="decimal">decimal</label>
+			<input type="text" name="decimal" id="decimal" data-garm="decimal" />
+
+			<label for="number">number</label>
+			<input type="text" name="number" id="number" data-garm="number" />
+
+			<label for="range">number (1 - 10)</label>
+			<input type="text" name="range" id="range" data-garm="number[1,10]" />
+
+			<label for="intrange">int number (100 - 1000)</label>
+			<input type="text" name="intrange" id="intrange" data-garm="integer number[100,1000]" />
+
+			<label for="match">match no-case (a,B)</label>
+			<input type="text" name="match" id="match" data-garm="match[a,B]" />
+
+			<label for="matchField1">match fields password (8 chars, 1 uppercase, 1 int, 1 !@#$&amp;\*)</label>
+			<input type="text" name="matchField1" id="matchField1" data-garm="password match-field[#matchField2]" />
+			<input type="text" name="matchField2" id="matchField2" data-garm="password match-field[#matchField1]" />
+
+			<label for="length">length (5 - 10)</label>
+			<input type="text" name="length" id="length" data-garm="length[5,10]" />
+
+			<label for="date">date (d.m.y)</label>
+			<input type="text" name="date" id="date" data-garm="date[d.m.y]" />
+
+			<label for="alpha">alpha</label>
+			<input type="text" name="alpha" id="alpha" data-garm="alpha" />
+
+			<label for="alphanumeric">alphanumeric</label>
+			<input type="text" name="alphanumeric" id="alphanumeric" data-garm="alphanumeric" />
+
+			<label>checkboxgroup (3 - 5)</label>
+			<fieldset id="checkboxgroup" data-garm="checkboxgroup[3,5]">
+				<input type="checkbox" name="cb1" id="cb1" value="1" />
+				<label for="cb1">Checkbox 1</label>
+
+				<input type="checkbox" name="cb2" id="cb2" value="2" />
+				<label for="cb2">Checkbox 2</label>
+
+				<input type="checkbox" name="cb3" id="cb3" value="3" />
+				<label for="cb3">Checkbox 3</label>
+
+				<input type="checkbox" name="cb4" id="cb4" value="4" />
+				<label for="cb4">Checkbox 4</label>
+
+
+				<input type="checkbox" name="cb5" id="cb5" value="5" />
+				<label for="cb5">Checkbox 5</label>
+
+				<input type="checkbox" name="cb6" id="cb6" value="6" />
+				<label for="cb6">Checkbox 6</label>
+			</fieldset>
+
+			<br >
+
+			<input type="submit" value="Senden" />
+		</form>
+
+		<script src="js/jquery-2.1.1.min.js"></script>
+		<script src="js/jquery.garm.js"></script>
+		<script src="js/main.js"></script>
+	</body>
+</html>
