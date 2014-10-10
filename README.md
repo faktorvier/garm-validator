@@ -237,15 +237,15 @@ $.garm.setValidator('callback', function(args, value, $field, $form, def) {
 
 * __Asynchronous callback__
 
- You can also create asynchronous callbacks. For a asynchronous callback you have to use the `def`-argument. The callback have to return the `def` object at the end, else the callback will be handled as synchronous. You have to call the function `def.promise(boolean validationStatus, $field)` when de asynchronous logic is finished.
+ You can also create asynchronous callbacks. For a asynchronous callback you have to use the `def`-argument. The callback have to return the `def` object at the end, else the callback will be handled as synchronous. You have to call the function `def.resolve(validationStatus)` when the asynchronous function is finished. The resolve argument takes one argument: `true` if the validation is successful or else `false`.
 
- Example with setTimeout:
+ Example with setTimeout (the value has to be 'banana'):
 
  ```javascript
 $.garm.setValidator('async-callback', function(args, value, $field, $form, def) {
     setTimeout(function() {
-        def.promise(true, $field);
-    }, 1000);
+        def.resolve(value == 'banana');
+    }, 2000);
 
     return def;
 });

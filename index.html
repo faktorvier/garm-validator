@@ -73,7 +73,7 @@
 				<option value="5">Option 5</option>
 			</select>
 
-			<label for="slowfake">slow ajax request fake</label>
+			<label for="slowfake">slow asynchronous fake (value = 'banana')</label>
 			<input type="text" name="slowfake" id="slowfake" data-garm="required slow" />
 
 			<label for="email">email</label>
@@ -146,8 +146,26 @@
 			<input type="submit" value="Senden" />
 		</form>
 
-		<script src="js/jquery-2.1.1.min.js"></script>
-		<script src="js/jquery.garm.js"></script>
-		<script src="js/main.js"></script>
+		<script src="jquery-2.1.1.min.js"></script>
+		<script src="jquery.garm.js"></script>
+
+		<script>
+			$(function() {
+				// Enable debug mode
+				$.garm.debugMode = true;
+
+				// Set custom validator
+				$.garm.setValidator('slow', function(args, value, $field, $form, def) {
+					setTimeout(function() {
+						def.resolve(value == 'banana');
+					}, 2000);
+
+					return def;
+				});
+
+				// Bind the validator
+				$('.validate').garm();
+			});
+		</script>
 	</body>
 </html>
