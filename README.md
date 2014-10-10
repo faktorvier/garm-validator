@@ -19,7 +19,9 @@ Garm Form Validator is a small, lightweight, attribute-based jQuery form validat
 
 Bind the validator plugin on any form-tag you like:
 
-`$('form.validator').garm();`
+```javascript
+$('form.validator').garm();
+```
 
 ### validators
 
@@ -164,20 +166,114 @@ The following example allows 2 - 4 checked checkboxes:
 
 If enabled, some debug output will be displayed in the developer console:
 
-`$.garm.debugMode = true/false`
+```javascript
+$.garm.debugMode = true/false
+```
 
 
-## Set global settings
+## Settings
 
-Coming soon...
+| Settings | Description | Type | Default |
+| ------------- | ------------- | ------------- | ------------- |
+| classFormBusy | This class is added to the form tag, if you submit the form. If the validation fails, the class will be removed. | string | 'busy' |
+| classFieldError | This class is added to the field, if the validation fails. If empty, no class is added.  | string | 'error' |
+| classFieldLoading | This class is added to the field, while a asynchronous validation is performed. If empty, no class is added. | string | 'loading' |
+| classLabelError | This class is added to the fields label, if the validation fails. If empty, no class is added. | string | '' |
+| attr | The attribute in which the validators are defined | string | 'data-garm' |
+| beforeSubmit | This callback is executed before the validation. | callback | function() {} |
+| onSubmit | This callback is executed after the validation and before onSuccess or onFail. | callback | function() {} |
+| onSuccess | This callback is executed after the validation is successful. If this callback returns a value, the default submit will be ignored. | callback | function() {} |
+| onFail | This callback is executed after the validation fails. | callback | function() {} |
 
-## Set settings by form
+### Set globally
 
-Coming soon...
+You can overwrite the settings globally for all forms at once:
 
-## Add custom validator
+```javascript
+$.garm.setConfig('classFormBusy', 'otherbusyclass');
+$.garm.setConfig('onSubmit', submitCallback);
+```
 
-Coming soon...
+### Set for each form individually
+
+Settings can also be overwritten individually for each form, through the __first__ argument of the validator-bind:
+
+```javascript
+$('form.validator').garm({
+    'classFormBusy' : 'otherbusyclass',
+    'onSubmit' : submitCallback
+});
+```
+
+## Set custom validator
+
+### Validator types
+
+* __Regular expression__
+
+ You can add a custom regular expression validator, by setting a valid javascript regexp object. If the pattern matches the value, the validation is successful:
+
+ ```javascript
+$.garm.setValidator('alphanum', /^([a-z0-9]+)*$/i)
+```
+
+* __Callback__
+
+ You can add a callback as validator, so you can perform completely custom validations. A validator-callback offers you the following arguments:
+
+ * `args`: All the arguments in square-brackets as array
+ * `value`: The fields value
+ * `$field`: A jQuery object of the field
+ * `$form`: A jQuery object of the current form
+ * `def`: Deferred object for asynchronous callbacks
+
+ Example:
+
+ ```javascript
+$.garm.setValidator('callback', function(args, value, $field, $form, def) {
+return true;
+)
+```
+
+* __Asynchronous callback__
+
+ You can also create asynchronous callbacks. For a asynchronous callback you have to use the `def`-argument. The callback have to return the `def` object at the end, else the callback will be handled as synchronous. You have to call the function `def.promise(boolean validationStatus, $field)` when de asynchronous logic is finished:
+
+ ```javascript
+$.garm.setValidator('async-callback', function(args, value, $field, $form, def) {
+    setTimeout(function() {
+        def.promise(true, $field);
+	}, 1000);
+
+    return def;
+})
+```
+
+* __AJAX__
+
+ Validators beginning with `http` will be handled as ajax-get requests. If the response is `true` then the validation is successfully, else the validation failed.
+
+ ```javascript
+$.garm.setValidator('check-email', 'http://yourdomain.tld/check-email.php')
+```
+
+### Set globally
+
+You can add or overwrite validators globally for all forms at once:
+
+```javascript
+$.garm.setValidator('alphanum', /^([a-z0-9]+)*$/i)
+```
+
+### Set for each form individually
+
+Validators can also be added and overwritten individually for each form, through the __second__ argument of the validator-bind:
+
+```javascript
+$('form.validator').garm({}, {
+    'alphanum' : /^([a-z0-9]+)*$/i
+});
+```
 
 ## Todo
 
