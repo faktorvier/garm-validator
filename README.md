@@ -227,26 +227,28 @@ $.garm.setValidator('alphanum', /^([a-z0-9]+)*$/i)
  * `$form`: A jQuery object of the current form
  * `def`: Deferred object for asynchronous callbacks
 
- Example:
+ Example (the value has to be 'banana'):
 
  ```javascript
-$.garm.setValidator('callback', function(args, value, $field, $form, def) {
-return true;
-)
+    $.garm.setValidator('callback', function(args, value, $field, $form, def) {
+        return value == 'banana';
+    )
 ```
 
 * __Asynchronous callback__
 
- You can also create asynchronous callbacks. For a asynchronous callback you have to use the `def`-argument. The callback have to return the `def` object at the end, else the callback will be handled as synchronous. You have to call the function `def.promise(boolean validationStatus, $field)` when de asynchronous logic is finished:
+ You can also create asynchronous callbacks. For a asynchronous callback you have to use the `def`-argument. The callback have to return the `def` object at the end, else the callback will be handled as synchronous. You have to call the function `def.promise(boolean validationStatus, $field)` when de asynchronous logic is finished.
+
+ Example with setTimeout:
 
  ```javascript
-$.garm.setValidator('async-callback', function(args, value, $field, $form, def) {
-    setTimeout(function() {
-        def.promise(true, $field);
+    $.garm.setValidator('async-callback', function(args, value, $field, $form, def) {
+        setTimeout(function() {
+            def.promise(true, $field);
 	}, 1000);
 
-    return def;
-})
+        return def;
+    })
 ```
 
 * __AJAX__
