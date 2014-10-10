@@ -230,9 +230,9 @@ $.garm.setValidator('alphanum', /^([a-z0-9]+)*$/i)
  Example (the value has to be 'banana'):
 
  ```javascript
-    $.garm.setValidator('callback', function(args, value, $field, $form, def) {
-        return value == 'banana';
-    )
+$.garm.setValidator('callback', function(args, value, $field, $form, def) {
+    return value == 'banana';
+});
 ```
 
 * __Asynchronous callback__
@@ -242,13 +242,13 @@ $.garm.setValidator('alphanum', /^([a-z0-9]+)*$/i)
  Example with setTimeout:
 
  ```javascript
-    $.garm.setValidator('async-callback', function(args, value, $field, $form, def) {
-        setTimeout(function() {
-            def.promise(true, $field);
-	}, 1000);
+$.garm.setValidator('async-callback', function(args, value, $field, $form, def) {
+    setTimeout(function() {
+        def.promise(true, $field);
+    }, 1000);
 
-        return def;
-    })
+    return def;
+});
 ```
 
 * __AJAX__
