@@ -7,7 +7,7 @@ Garm Form Validator is a small, lightweight, attribute-based jQuery form validat
 
 * <a href="http://jquery.com/" target="_blank">jQuery 1.9+</a>
 
-## Installation and use
+## Installation
 
 * Download the file `jquery.garm.min.js`
 * Upload it to your server (e.g. `/js/` folder)
@@ -25,15 +25,21 @@ Bind the validator plugin on any form-tag you like:
 
 Validators can be defined in the `data-garm`-attribute of any form-field:
 
-`<input type="text" name="firstname" data-garm="required" />`
+```html
+<input type="text" name="firstname" data-garm="required" />
+```
 
 Multiple validators can be separated by spaces:
 
-`<input type="text" name="email" data-garm="required email" />`
+```html
+<input type="text" name="email" data-garm="required email" />
+```
 
 Some validators take one or multiple arguments. They can be defined in __square brackets__ and __comma-separated__ after the validator-name:
 
-`<input type="text" name="int-range" data-garm="required integer number[10,100]" />`
+```html
+<input type="text" name="int-range" data-garm="required integer number[10,100]" />
+```
 
 ## Validators
 
@@ -55,17 +61,21 @@ Allows only integers (positive and negative).
 
 Allows only decimal numbers (any decimal places, positive and negative).
 
-### number[ _min_, _max_ ]
+### number
 
 Allows any integers and decimal numbers (positive and negative).
 
-Optionally you can define an range:
+### number[ _min_, _max_ ]
+
+Allows any integers and decimal numbers within the defined range:
 
 `number[10]` = 10 - n, `number[n,100]` = n - 100, `number[20,40]` = 20 - 40, `number[-20,20]` = -20 - 20
 
 Can be combined with `integer` or `decimal`, if you want to limit the range to `integer` or `decimal` only:
 
-`<input type="text" name="int-range" data-garm="integer number[10,100]" />`
+```html
+<input type="text" name="int-range" data-garm="integer number[10,100]" />
+```
 
 ### alpha
 
@@ -118,7 +128,9 @@ The following number `5555 5555 5555 4444` will be __invalid__ if the validator 
 
 Allows only values defined in the arguments (__case insensitive__). The following example allows only one of the three values `apple`, `pear` or `banana`:
 
-`<input type="text" name="match" data-garm="match[apple,pear,banana]" />`
+```html
+<input type="text" name="match" data-garm="match[apple,pear,banana]" />
+```
 
 ### match-case[ _n strings ..._ ]
 
@@ -138,13 +150,13 @@ Allows only a number of checked checkboxes within the defined range. This is the
 
 The following example allows 2 - 4 checked checkboxes:
 
-```
+```html
 <fieldset data-garm="checkboxgroup[2,4]">
-<input type="checkbox" name="cb1" />
-<input type="checkbox" name="cb2" />
-<input type="checkbox" name="cb3" />
-<input type="checkbox" name="cb4" />
-<input type="checkbox" name="cb5" />
+    <input type="checkbox" name="cb1" />
+    <input type="checkbox" name="cb2" />
+    <input type="checkbox" name="cb3" />
+    <input type="checkbox" name="cb4" />
+    <input type="checkbox" name="cb5" />
 </fieldset>
 ```
 
