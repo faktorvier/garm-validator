@@ -15,12 +15,18 @@ Garm Form Validator is a small, lightweight, attribute-based jQuery form validat
 
 ## Use
 
-### plugin
+### normal form validaton
 
 Bind the validator plugin on any form-tag you like:
 
 ```javascript
 $('form.validator').garm();
+```
+
+You can also validate any html-block in your DOM, without submitting any form, by enabling `onlyValidate`:
+
+```javascript
+$('fieldgroup.step1').garm({ onlyValidate: true });
 ```
 
 ### validators
@@ -41,6 +47,30 @@ Some validators take one or multiple arguments. They can be defined in __square 
 
 ```html
 <input type="text" name="int-range" data-garm="required integer number[10,100]" />
+```
+
+### ignore validators
+
+You can (temporarily) ignore one, multiple or all validators by adding the `data-garm-ignore`-attribute on a field or a container. This can be useful, if you want to disable a specific validator temporarily. The following example ignores __all__ validators on this field:
+
+```html
+<input type="text" name="int-range" data-garm="required integer number[10,100]" data-garm-ignore="all" />
+```
+
+You can also ignore only one or multiple validators, with a __comma-separated__ list:
+
+```html
+<input type="text" name="int-range" data-garm="required integer number[10,100]" data-garm-ignore="integer number" />
+```
+
+If you want to ignore a validator on multiple fields, you can define  `data-garm-ignore` on a parent:
+
+```html
+<fieldset data-garm-ignore="number">
+   <input type="text" name="int-range1" data-garm="required integer number" />
+   <input type="text" name="int-range2" data-garm="required integer number" />
+   <input type="text" name="int-range3" data-garm="required integer number" />
+</fieldset>
 ```
 
 ## Validators
@@ -180,6 +210,7 @@ $.garm.debugMode = true/false
 | classFieldLoading | This class is added to the field, while a asynchronous validation is performed. If empty, no class is added. | string | 'loading' |
 | classLabelError | This class is added to the fields label, if the validation fails. If empty, no class is added. | string | '' |
 | attr | The attribute in which the validators are defined | string | 'data-garm' |
+| attrIgnore | The attribute in which the ignore-validators are defined | string | 'data-garm-ignore' |
 | beforeSubmit | This callback is executed before the validation. | callback | function() {} |
 | onSubmit | This callback is executed after the validation and before onSuccess or onFail. | callback | function() {} |
 | onSuccess | This callback is executed after the validation is successful. If this callback returns a value, the default submit will be ignored. | callback | function() {} |
@@ -284,6 +315,10 @@ $('form.validator').garm({}, {
 * date: better date format handling
 
 ## Changelog
+
+##### v1.0.1 (2014-11-17)
+* Ignore attribute added
+* onlyValidate attribute added
 
 ##### v1.0.0 (2014-10-08)
 Initial release

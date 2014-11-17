@@ -1,4 +1,4 @@
-/*! Garm Form Validator v1.0.0 | (c) 2014 FAKTOR VIER GmbH | http://faktorvier.ch */
+/*! Garm Form Validator v1.0.1 | (c) 2014 FAKTOR VIER GmbH | http://faktorvier.ch */
 
 (function($) {
 	// Global object
@@ -162,6 +162,8 @@
 
 		// Options
 		attr: 'data-garm',
+		attrIgnore: 'data-garm-ignore',
+		onlyValidate: false,
 		//disableSubmit: false, // TODO
 		//ajaxSubmit: false, // TODO
 
@@ -172,6 +174,165 @@
 		onFail: function() {}
 	};
 
+	// Validate
+	$.garm.validate = function(garmConfig, garmValidators, $form) {
+		// CALLBACK: before submit
+		garmConfig.beforeSubmit();
+
+		// Check if form is already busy
+		if($form.hasClass(garmConfig.classFormBusy)) {
+			// DEBUG: Validation busy
+			$.garm.info('VALIDATION ALREADY BUSY');
+
+			return false;
+		}
+
+		// DEBUG: Validation started
+		$.garm.info('VALIDATION STARTED');
+
+		var $fields = $form.find('[' + garmConfig.attr + ']').not('[' + garmConfig.attr + '=""]');
+		var $labels = $form.find('label');
+
+		var fieldsFailCount = 0;
+		var deferredValidators = [];
+
+		// Remove all existing error classes
+		$fields.removeClass(garmConfig.classFieldError);
+		$labels.removeClass(garmConfig.classLabelError);
+
+		// Add busy class to the form
+		$form.addClass(garmConfig.classFormBusy);
+
+		$fields.each(function() {
+			var $field = $(this);
+			var fieldValue = $field.val();
+			var fieldName = $field.attr('name');
+			//var fieldValue = $.trim($field.val());
+			var fieldValidators = $field.attr(garmConfig.attr).split(' ');
+
+			for(var classIndex in fieldValidators) {
+				var validatorName = fieldValidators[classIndex];
+				var validatorArgs = [];
+
+				if(validatorName.indexOf('[') !== -1) {
+					validatorArgs = validatorName.substring(validatorName.indexOf('[') + 1, validatorName.length - 1).split(',');
+					validatorName =  validatorName.substring(0, validatorName.indexOf('['));
+				}
+
+				// Check if field has ignored validators
+				var ignoreValidator = $field.is('[' + garmConfig.attrIgnore + '~="' + validatorName + '"]') || $field.is('[' + garmConfig.attrIgnore + '="all"]');
+
+				// Check if parent container has ignored validators
+				var parentIgnore = $field.parents('[' + garmConfig.attrIgnore + ']');
+
+				if(parentIgnore.length) {
+					ignoreValidator = parentIgnore.is('[' + garmConfig.attrIgnore + '~="' + validatorName + '"]') || parentIgnore.is('[' + garmConfig.attrIgnore + '="all"]');
+				}
+
+				// DEBUG: Validation ignored
+				if(ignoreValidator) {
+					$.garm.info('validation ignored (field: ' + fieldName + ', validator: ' + validatorName + ')');
+				}
+
+				if(validatorName in garmValidators && !$field.hasClass(garmConfig.classFieldError) && !ignoreValidator) {
+					var validatorValue = garmValidators[validatorName];
+
+					// Add deferred object to the deferred-array
+					deferredValidators.push(function() {
+						var validatorDeferred = $.Deferred();
+
+						if(typeof validatorValue == 'function') {
+							// Callback
+							var callbackReturn = validatorValue(validatorArgs, fieldValue, $field, $form, validatorDeferred);
+
+							if(typeof callbackReturn == 'undefined' || typeof callbackReturn.promise == 'undefined') {
+								validatorDeferred.resolve(callbackReturn == true);
+							} else {
+								validatorDeferred = callbackReturn;
+
+								// Add loading class
+								$field.addClass(garmConfig.classFieldLoading);
+							}
+						} else if(typeof validatorValue == 'string' && validatorValue.indexOf('http') === 0) {
+							// Add loading class
+							$field.addClass(garmConfig.classFieldLoading);
+
+							// Ajax
+							$.get(validatorValue, { value : fieldValue }).always(function(status) {
+								validatorDeferred.resolve($.trim(status) == true);
+							});
+						} else if(validatorValue instanceof RegExp) {
+							// Regexp
+							validatorDeferred.resolve(validatorValue.test(fieldValue));
+						}
+
+						validatorDeferred.always(function(validatorStatus) {
+							// Remove loading class
+							$field.removeClass(garmConfig.classFieldLoading);
+
+							if(validatorStatus == false) {
+								// Update fail counter
+								fieldsFailCount++;
+
+								// Add error classes
+								$field.addClass(garmConfig.classFieldError);
+								$form.find('label[for="' + $field.attr('id') + '"]').addClass(garmConfig.classLabelError);
+
+								// DEBUG: Validation failed
+								if($.garm.debugMode) {
+									if(typeof fieldName == 'undefined') {
+										fieldName = $field[0].tagName.toLowerCase();
+										fieldName += $field.is('[id]') ? '#' + $field.attr('id') : '';
+									}
+
+									$.garm.warn('validation failed (field: ' + fieldName + ', validator: ' + validatorName + ')');
+								}
+							}
+						});
+
+						return validatorDeferred.promise();
+					}());
+				}
+			};
+		});
+
+		// Run deferred objects
+		$.when.apply($, deferredValidators).done(function() {
+			// CALLBACK: on submit
+			garmConfig.onSubmit();
+
+			if(fieldsFailCount === 0) {
+				// DEBUG: Validation end
+				$.garm.info('VALIDATION ENDED: SUCCESS');
+
+				// CALLBACK: on success (ignore default success if success-callback returns a value)
+				if(typeof garmConfig.onSuccess() != 'undefined') {
+					return true;
+				}
+
+				if(garmConfig.onlyValidate) {
+					// Remove busy class from form
+					$form.removeClass(garmConfig.classFormBusy);
+				} else {
+					$form.off('submit.garm').submit();
+				}
+			} else {
+				// Remove busy class from form
+				$form.removeClass(garmConfig.classFormBusy);
+
+				// DEBUG: Validation end
+				$.garm.warn('VALIDATION ENDED: ' + fieldsFailCount + ' FIELDS FAILED');
+
+				// CALLBACK: on fail (ignore default fail if fail-callback returns a value()
+				if(typeof garmConfig.onFail() != 'undefined') {
+					return true;
+				}
+			}
+		});
+
+		return true;
+	}
+
 	// Main function
 	$.fn.garm = function(options, validators) {
 		// Overwrite default settings and validators
@@ -180,146 +341,17 @@
 
 		// Bind each form
 		return this.each(function() {
-			$(this).on('submit.garm', function(e) {
-				e.preventDefault();
-
-				// CALLBACK: before submit
-				garmConfig.beforeSubmit();
-
-				var $form = $(this);
-
-				// Check if form is already busy
-				if($form.hasClass(garmConfig.classFormBusy)) {
-					// DEBUG: Validation busy
-					$.garm.info('VALIDATION ALREADY BUSY');
-
-					return false;
-				}
-
-				// DEBUG: Validation started
-				$.garm.info('VALIDATION STARTED');
-
-				var $fields = $form.find('[' + garmConfig.attr + ']').not('[' + garmConfig.attr + '=""]');
-				var $labels = $form.find('label');
-
-				var fieldsFailCount = 0;
-				var deferredValidators = [];
-
-				// Remove all existing error classes
-				$fields.removeClass(garmConfig.classFieldError);
-				$labels.removeClass(garmConfig.classLabelError);
-
-				// Add busy class to the form
-				$form.addClass(garmConfig.classFormBusy);
-
-				$fields.each(function() {
-					var $field = $(this);
-					var fieldValue = $field.val();
-					//var fieldValue = $.trim($field.val());
-					var fieldValidators = $field.attr(garmConfig.attr).split(' ');
-
-					for(var classIndex in fieldValidators) {
-						var validatorName = fieldValidators[classIndex];
-						var validatorArgs = [];
-
-						if(validatorName.indexOf('[') !== -1) {
-							validatorArgs = validatorName.substring(validatorName.indexOf('[') + 1, validatorName.length - 1).split(',');
-							validatorName =  validatorName.substring(0, validatorName.indexOf('['));
-						}
-
-						if(validatorName in garmValidators && !$field.hasClass(garmConfig.classFieldError)) {
-							var validatorValue = garmValidators[validatorName];
-
-							// Add deferred object to the deferred-array
-							deferredValidators.push(function() {
-								var validatorDeferred = $.Deferred();
-
-								if(typeof validatorValue == 'function') {
-									// Callback
-									var callbackReturn = validatorValue(validatorArgs, fieldValue, $field, $form, validatorDeferred);
-
-									if(typeof callbackReturn == 'undefined' || typeof callbackReturn.promise == 'undefined') {
-										validatorDeferred.resolve(callbackReturn == true);
-									} else {
-										validatorDeferred = callbackReturn;
-
-										// Add loading class
-										$field.addClass(garmConfig.classFieldLoading);
-									}
-								} else if(typeof validatorValue == 'string' && validatorValue.indexOf('http') === 0) {
-									// Add loading class
-									$field.addClass(garmConfig.classFieldLoading);
-
-									// Ajax
-									$.get(validatorValue, { value : fieldValue }).always(function(status) {
-										validatorDeferred.resolve($.trim(status) == true);
-									});
-								} else if(validatorValue instanceof RegExp) {
-									// Regexp
-									validatorDeferred.resolve(validatorValue.test(fieldValue));
-								}
-
-								validatorDeferred.always(function(validatorStatus) {
-									// Remove loading class
-									$field.removeClass(garmConfig.classFieldLoading);
-
-									if(validatorStatus == false) {
-										// Update fail counter
-										fieldsFailCount++;
-
-										// Add error classes
-										$field.addClass(garmConfig.classFieldError);
-										$form.find('label[for="' + $field.attr('id') + '"]').addClass(garmConfig.classLabelError);
-
-										// DEBUG: Validation failed
-										if($.garm.debugMode) {
-											var fieldName = $field.attr('name');
-
-											if(typeof fieldName == 'undefined') {
-												fieldName = $field[0].tagName.toLowerCase();
-												fieldName += $field.is('[id]') ? '#' + $field.attr('id') : '';
-											}
-
-											$.garm.warn('validation failed (field: ' + fieldName + ', validator: ' + validatorName + ')');
-										}
-									}
-								});
-
-								return validatorDeferred.promise();
-							}());
-						}
-					};
+			if(garmConfig.onlyValidate) {
+				$(this).each(function() {
+					$.garm.validate(garmConfig, garmValidators, $(this));
 				});
+			} else {
+				$(this).on('submit.garm', function(e) {
+					e.preventDefault();
 
-				// Run deferred objects
-				$.when.apply($, deferredValidators).done(function() {
-					// CALLBACK: on submit
-					garmConfig.onSubmit();
-
-					if(fieldsFailCount === 0) {
-						// DEBUG: Validation end
-						$.garm.info('VALIDATION ENDED: SUCCESS');
-
-						// CALLBACK: on success (ignore default success if success-callback returns a value)
-						if(typeof garmConfig.onSuccess() != 'undefined') {
-							return true;
-						}
-
-						$form.off('submit.garm').submit();
-					} else {
-						// Remove busy class from form
-						$form.removeClass(garmConfig.classFormBusy);
-
-						// DEBUG: Validation end
-						$.garm.warn('VALIDATION ENDED: ' + fieldsFailCount + ' FIELDS FAILED');
-
-						// CALLBACK: on fail (ignore default fail if fail-callback returns a value()
-						if(typeof garmConfig.onFail() != 'undefined') {
-							return true;
-						}
-					}
+					$.garm.validate(garmConfig, garmValidators, $(this));
 				});
-			});
+			}
 		});
 	};
 }(jQuery));
