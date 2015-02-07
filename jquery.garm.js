@@ -169,9 +169,9 @@
 
 		// Callbacks
 		beforeSubmit: function() {},
-		onSubmit: function() {},
-		onSuccess: function() {},
-		onFail: function() {}
+		onSubmit: function($form) {},
+		onSuccess: function($form) {},
+		onFail: function($form) {}
 	};
 
 	// Validate
@@ -299,14 +299,14 @@
 		// Run deferred objects
 		$.when.apply($, deferredValidators).done(function() {
 			// CALLBACK: on submit
-			garmConfig.onSubmit();
+			garmConfig.onSubmit($form);
 
 			if(fieldsFailCount === 0) {
 				// DEBUG: Validation end
 				$.garm.info('VALIDATION ENDED: SUCCESS');
 
 				// CALLBACK: on success (ignore default success if success-callback returns a value)
-				if(typeof garmConfig.onSuccess() != 'undefined') {
+				if(typeof garmConfig.onSuccess($form) != 'undefined') {
 					return true;
 				}
 
@@ -324,7 +324,7 @@
 				$.garm.warn('VALIDATION ENDED: ' + fieldsFailCount + ' FIELDS FAILED');
 
 				// CALLBACK: on fail (ignore default fail if fail-callback returns a value()
-				if(typeof garmConfig.onFail() != 'undefined') {
+				if(typeof garmConfig.onFail($form) != 'undefined') {
 					return true;
 				}
 			}
