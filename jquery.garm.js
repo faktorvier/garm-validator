@@ -1,4 +1,4 @@
-/*! Garm Form Validator v1.0.2 | (c) 2014 FAKTOR VIER GmbH | http://faktorvier.ch */
+/*! Garm Form Validator v1.0.3 | (c) 2014 FAKTOR VIER GmbH | http://faktorvier.ch */
 
 (function($) {
 	// Global object
@@ -171,7 +171,7 @@
 		beforeSubmit: function() {},
 		onSubmit: function($form) {},
 		onSuccess: function($form) {},
-		onFail: function($form) {}
+		onFail: function($form, fieldErrors) {}
 	};
 
 	// Validate
@@ -194,6 +194,7 @@
 		var $labels = $form.find('label');
 
 		var fieldsFailCount = 0;
+		var fieldErrors = {};
 		var deferredValidators = [];
 
 		// Remove all existing error classes
@@ -274,6 +275,14 @@
 								// Update fail counter
 								fieldsFailCount++;
 
+								if(typeof fieldName != 'undefined') {
+									if(typeof fieldErrors[fieldName] == 'undefined') {
+										fieldErrors[fieldName] = [];
+									}
+
+									fieldErrors[fieldName].push(validatorName);
+								}
+
 								// Add error classes
 								$field.addClass(garmConfig.classFieldError);
 								$form.find('label[for="' + $field.attr('id') + '"]').addClass(garmConfig.classLabelError);
@@ -324,7 +333,7 @@
 				$.garm.warn('VALIDATION ENDED: ' + fieldsFailCount + ' FIELDS FAILED');
 
 				// CALLBACK: on fail (ignore default fail if fail-callback returns a value()
-				if(typeof garmConfig.onFail($form) != 'undefined') {
+				if(typeof garmConfig.onFail($form, fieldErrors) != 'undefined') {
 					return true;
 				}
 			}
