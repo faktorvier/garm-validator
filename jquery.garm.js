@@ -1,4 +1,4 @@
-/*! Garm Form Validator v1.0.3 | (c) 2014 FAKTOR VIER GmbH | http://faktorvier.ch */
+/*! Garm Form Validator v1.0.4 | (c) 2014 FAKTOR VIER GmbH | http://faktorvier.ch */
 
 (function($) {
 	// Global object
@@ -130,7 +130,7 @@
 			var formatArray = args[0].split(delimiter);
 			var inputArray = value.split(delimiter);
 
-			var match = $.trim(value) == '' || (formatArray.length == inputArray.length && !isNaN(Date.parse(inputArray[formatArray.indexOf('m')] + '.' + inputArray[formatArray.indexOf('d')] + '.' + inputArray[formatArray.indexOf('y')])));
+			var match = $.trim(value) == '' || (formatArray.length == inputArray.length && !isNaN(Date.parse(inputArray[formatArray.indexOf('y')] + '/' + inputArray[formatArray.indexOf('m')] + '/' + inputArray[formatArray.indexOf('d')])));
 
 			return match;
 		},

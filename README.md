@@ -316,6 +316,9 @@ $('form.validator').garm({}, {
 
 ## Changelog
 
+##### v1.0.4 (2016-11-01)
+* Fixed the date validator for IE
+
 ##### v1.0.1 (2014-11-17)
 * Ignore attribute added
 * onlyValidate attribute added
