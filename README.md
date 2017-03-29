@@ -211,10 +211,10 @@ $.garm.debugMode = true/false
 | classLabelError | This class is added to the fields label, if the validation fails. If empty, no class is added. | string | '' |
 | attr | The attribute in which the validators are defined | string | 'data-garm' |
 | attrIgnore | The attribute in which the ignore-validators are defined | string | 'data-garm-ignore' |
-| beforeSubmit | This callback is executed before the validation. | callback | function() {} |
-| onSubmit | This callback is executed after the validation and before onSuccess or onFail. | callback | function() {} |
-| onSuccess | This callback is executed after the validation is successful. If this callback returns a value, the default submit will be ignored. | callback | function() {} |
-| onFail | This callback is executed after the validation fails. | callback | function() {} |
+| beforeSubmit | This callback is executed before the validation. | callback | function($form) {} |
+| onSubmit | This callback is executed after the validation and before onSuccess or onFail. | callback | function($form) {} |
+| onSuccess | This callback is executed after the validation is successful. If this callback returns a value, the default submit will be ignored. | callback | function($form) {} |
+| onFail | This callback is executed after the validation fails. | callback | function($form, errorFieldNames, errorFields) {} |
 
 ### Set globally
 
@@ -315,6 +315,9 @@ $('form.validator').garm({}, {
 * date: better date format handling
 
 ## Changelog
+
+##### v1.0.4 (2017-03-29)
+* Add new arguments to the onFail callback, containing all error fields as jQuery objects
 
 ##### v1.0.4 (2016-11-01)
 * Fixed the date validator for IE

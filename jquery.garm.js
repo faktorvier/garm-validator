@@ -1,4 +1,4 @@
-/*! Garm Form Validator v1.0.4 | (c) 2014 FAKTOR VIER GmbH | http://faktorvier.ch */
+/*! Garm Form Validator v1.0.5 | (c) 2017 FAKTOR VIER GmbH | http://faktorvier.ch */
 
 (function($) {
 	// Global object
@@ -168,16 +168,16 @@
 		//ajaxSubmit: false, // TODO
 
 		// Callbacks
-		beforeSubmit: function() {},
+		beforeSubmit: function($form) {},
 		onSubmit: function($form) {},
 		onSuccess: function($form) {},
-		onFail: function($form, fieldErrors) {}
+		onFail: function($form, errorFieldNames, errorFields) {}
 	};
 
 	// Validate
 	$.garm.validate = function(garmConfig, garmValidators, $form) {
 		// CALLBACK: before submit
-		garmConfig.beforeSubmit();
+		garmConfig.beforeSubmit($form);
 
 		// Check if form is already busy
 		if($form.hasClass(garmConfig.classFormBusy)) {
@@ -194,7 +194,8 @@
 		var $labels = $form.find('label');
 
 		var fieldsFailCount = 0;
-		var fieldErrors = {};
+		var errorFieldNames = {};
+		var errorFields = [];
 		var deferredValidators = [];
 
 		// Remove all existing error classes
@@ -208,6 +209,11 @@
 			var $field = $(this);
 			var fieldValue = $field.val();
 			var fieldName = $field.attr('name');
+
+			if(typeof fieldName == 'undefined' || fieldName.length == 0) {
+				fieldName = $field.attr('data-garm-name');
+			}
+
 			//var fieldValue = $.trim($field.val());
 			var fieldValidators = $field.attr(garmConfig.attr).split(' ');
 
@@ -271,21 +277,36 @@
 							// Remove loading class
 							$field.removeClass(garmConfig.classFieldLoading);
 
+							var fieldId = $field.attr('id');
+							var $fieldLabel = $();
+
+							if(typeof fieldId != 'undefined') {
+								$fieldLabel = $form.find('label[for="' + $field.attr('id') + '"]');
+							}
+
 							if(validatorStatus == false) {
 								// Update fail counter
 								fieldsFailCount++;
 
+								// Add fieldname to error fields
 								if(typeof fieldName != 'undefined') {
-									if(typeof fieldErrors[fieldName] == 'undefined') {
-										fieldErrors[fieldName] = [];
+									if(typeof errorFieldNames[fieldName] == 'undefined') {
+										errorFieldNames[fieldName] = [];
 									}
 
-									fieldErrors[fieldName].push(validatorName);
+									errorFieldNames[fieldName].push(validatorName);
 								}
+
+								// Add field to error fields
+								errorFields.push({
+									field: $field,
+									label: $fieldLabel,
+									error: validatorName
+								});
 
 								// Add error classes
 								$field.addClass(garmConfig.classFieldError);
-								$form.find('label[for="' + $field.attr('id') + '"]').addClass(garmConfig.classLabelError);
+								$fieldLabel.addClass(garmConfig.classLabelError);
 
 								// DEBUG: Validation failed
 								if($.garm.debugMode) {
@@ -333,7 +354,7 @@
 				$.garm.warn('VALIDATION ENDED: ' + fieldsFailCount + ' FIELDS FAILED');
 
 				// CALLBACK: on fail (ignore default fail if fail-callback returns a value()
-				if(typeof garmConfig.onFail($form, fieldErrors) != 'undefined') {
+				if(typeof garmConfig.onFail($form, errorFieldNames, errorFields) != 'undefined') {
 					return true;
 				}
 			}
