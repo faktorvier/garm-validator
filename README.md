@@ -316,7 +316,7 @@ $('form.validator').garm({}, {
 
 ## Changelog
 
-##### v1.0.4 (2017-03-29)
+##### v1.0.5 (2017-03-29)
 * Add new arguments to the onFail callback, containing all error fields as jQuery objects
 
 ##### v1.0.4 (2016-11-01)
